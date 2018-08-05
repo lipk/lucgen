@@ -6,7 +6,7 @@ scripts are not sandboxed.
 
 Simple example:
     
-    /* Lua snippets are enclosed in @
+    /* Lua snippets are enclosed in @ */
     @
     function declvars(type, prefix, count)
         for i = 1, count do
