@@ -11,15 +11,50 @@ function append(array, item)
 	array[#array + 1] = item;
 end
 
-function skipComment(text, i)
+function skipCComment(text, i)
 	i = i+2
 	while i <= text:len() do
 		if text:sub(i,i+1) == '*/' then
-			return i
+			return i+1
 		end
 		i = i+1
 	end
 	return i
+end
+
+function skipLuaComment(text, i)
+    i = i+2
+    while i <= text:len() do
+        if text:sub(i,i) == '\n' then
+            return i
+        end
+        i = i+1
+    end
+    return i
+end
+
+function skipLuaLiteralString(text, i)
+    i = i+1
+    local ending = ']'
+    while i <= text:len() do
+        if text:sub(i,i) == '=' then
+            ending = ending .. '='
+        elseif text:sub(i,i) == '[' then
+            ending = ending .. ']'
+            i = i+1
+            break
+        else
+            return i
+        end
+        i = i+1
+    end
+    while i <= text:len() do
+        if text:sub(i,i+ending:len()-1) == ending then
+            return i+ending:len()-2
+        end
+        i = i+1
+    end
+    return i
 end
 
 function skipString(text, i)
@@ -45,19 +80,28 @@ function parse(file)
 	local text = readAll(file);
 	local parts = {{}}
 	i = 1
-	local indent = 0;
+	local inLua = false
 	while i <= text:len() do
 		local c = text:sub(i,i)
 		if c == '"' or c == "'" then
 			j = skipString(text, i)
 			append(parts[#parts], text:sub(i,j))
 			i = j
-		elseif text:sub(i,i+1) == '/*' then
-			j = skipComment(text, i)
+		elseif not inLua and text:sub(i,i+1) == '/*' then
+			j = skipCComment(text, i)
+			append(parts[#parts], text:sub(i,j))
+			i = j
+		elseif inLua and text:sub(i,i+1) == '--' then
+		    j = skipLuaComment(text, i)
+			append(parts[#parts], text:sub(i,j))
+			i = j
+		elseif inLua and text:sub(i,i) == '[' then
+		    j = skipLuaLiteralString(text, i)
 			append(parts[#parts], text:sub(i,j))
 			i = j
 		elseif c == '@' then
 			append(parts, {})
+			inLua = not inLua
 		else
 			append(parts[#parts], c)
 		end
