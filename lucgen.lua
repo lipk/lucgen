@@ -137,7 +137,7 @@ function process(file)
 		    end
 		end
 		unind = function()
-		    intIndent[#intIndet] = nil
+		    intIndent[#intIndent] = nil
 		end
 		local extIndent = '\n' .. parts[i-1]:match('[\t ]*$')
 		assert(loadstring(parts[i]))()
