@@ -128,9 +128,9 @@ function process(file)
 		ind = function(x)
 		    local x = x or 4
 		    if type(x) == 'string' then
-		        intIndent[#intIndent] = x
+		        intIndent[#intIndent+1] = x
 		    else
-		        intIndent[#intIndent] = ''
+		        intIndent[#intIndent+1] = ''
 		        for j = 1,x do
 		            intIndent[#intIndent] = intIndent[#intIndent] .. ' '
 		        end
