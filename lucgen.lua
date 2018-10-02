@@ -115,14 +115,33 @@ end
 
 function process(file)
 	local parts = parse(file)
+	local intIndent = {}
 	for i = 2, #parts, 2 do
 		local output = {""};
 		emit = function(text)
 			append(output, text)
 		end
-		local indent = '\n' .. parts[i-1]:match('[\t ]*$')
+		emiti = function(text)
+		    append(output, table.concat(intIndent))
+		    append(output, text)
+		end
+		ind = function(x)
+		    local x = x or 4
+		    if type(x) == 'string' then
+		        intIndent[#intIndent] = x
+		    else
+		        intIndent[#intIndent] = ''
+		        for j = 1,x do
+		            intIndent[#intIndent] = intIndent[#intIndent] .. ' '
+		        end
+		    end
+		end
+		unind = function()
+		    intIndent[#intIndet] = nil
+		end
+		local extIndent = '\n' .. parts[i-1]:match('[\t ]*$')
 		assert(loadstring(parts[i]))()
-		parts[i] = table.concat(output):gsub('\n', indent)
+		parts[i] = table.concat(output):gsub('\n', extIndent)
 	end
 	return table.concat(parts)
 end
