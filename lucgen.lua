@@ -149,15 +149,14 @@ end
 i = 1
 source = nil
 target = nil
-preload = nil
+preload = {}
 while i <= #arg do
 	if arg[i] == '-o' then
 		assert(target == nil)
 		target = assert(arg[i+1])
 		i = i+1
 	elseif arg[i] == '-l' then
-		assert(preload == nil)
-		preload = assert(arg[i+1])
+		preload[#preload+1] = assert(arg[i+1])
 		i = i+1
 	elseif arg[i] == '-h' then
 		print('Usage: lucgen.lua SOURCEFILE [-o TARGETFILE] [-l PRELOADFILE] [-h]')
@@ -170,8 +169,10 @@ while i <= #arg do
 end
 
 assert(source)
-if preload then
-	assert(loadfile(preload))()
+if #preload > 0 then
+    for i=1,#preload do
+    	assert(loadfile(preload[i]))()
+    end
 end
 generated = process(source)
 if target then

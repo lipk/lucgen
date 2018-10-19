@@ -47,6 +47,8 @@ In a tad more detail:
 * SOURCEFILE is the file to process
 * The result is written to stdout by default, use -o to redirect it into
   TARGETFILE
-* You can optionally specify an extra Lua script to be run before processing the
-  source with -l
+* You can optionally specify one or more extra Lua scripts to be run before
+  processing the source with -l. (The flag is required before each script).
 * -h prints the help and exits
+
+lucgen requires Lua 5.3 at minimum.
