@@ -113,17 +113,26 @@ function parse(file)
 	return parts
 end
 
+function expand(str, ...)
+    local arg = {...}
+    for i=1,#arg do
+        local var = '$'..i
+        str = string.gsub(str, var, arg[i])
+    end
+    return str
+end
+
 function process(file)
 	local parts = parse(file)
 	local intIndent = {}
 	for i = 2, #parts, 2 do
 		local output = {""};
-		emit = function(text)
-			append(output, text)
+		emit = function(text, ...)
+			append(output, expand(text, ...))
 		end
-		emiti = function(text)
+		emiti = function(text, ...)
 		    append(output, table.concat(intIndent))
-		    append(output, text)
+		    append(output, expand(text, ...))
 		end
 		ind = function(x)
 		    local x = x or 4
