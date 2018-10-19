@@ -1,4 +1,4 @@
-#!/usr/bin/env lua
+#!/usr/bin/env lua5.3
 
 function readAll(file)
 	local handle = assert(io.open(file, 'r'))
@@ -140,7 +140,7 @@ function process(file)
 		    intIndent[#intIndent] = nil
 		end
 		local extIndent = '\n' .. parts[i-1]:match('[\t ]*$')
-		assert(loadstring(parts[i]))()
+		assert(load(parts[i]))()
 		parts[i] = table.concat(output):gsub('\n', extIndent)
 	end
 	return table.concat(parts)
