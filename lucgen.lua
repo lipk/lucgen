@@ -113,7 +113,7 @@ function parse(file)
 	return parts
 end
 
-function expand(str, ...)
+function expandPositional(str, ...)
     local arg = {...}
     for i=1,#arg do
         local var = '$'..i
@@ -122,17 +122,37 @@ function expand(str, ...)
     return str
 end
 
+function expandNamed(t)
+    assert(#t == 1)
+    local str = t[1]
+    for key,value in pairs(t) do
+        local var = '$'..key
+        str = string.gsub(str, var, value)
+    end
+end
+
 function process(file)
 	local parts = parse(file)
 	local intIndent = {}
 	for i = 2, #parts, 2 do
 		local output = {""};
-		emit = function(text, ...)
-			append(output, expand(text, ...))
+		emit = function(arg, ...)
+            local text = ''
+            if type(arg) == 'string' then
+                text = expandPositional(arg, ...)
+            else
+                assert(#{...} == 0)
+                if type(arg) == 'table' then
+                    text = expandNamed(arg)
+                else
+                    text = ''..arg
+                end
+            end
+			append(output, text)
 		end
-		emiti = function(text, ...)
+		emiti = function(arg, ...)
 		    append(output, table.concat(intIndent))
-		    append(output, expand(text, ...))
+		    emit(arg, ...)
 		end
 		ind = function(x)
 		    local x = x or 4
