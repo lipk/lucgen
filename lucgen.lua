@@ -113,23 +113,47 @@ function parse(file)
 	return parts
 end
 
-function expandPositional(str, ...)
-    local arg = {...}
-    for i=1,#arg do
-        local var = '$'..i
-        str = string.gsub(str, var, arg[i])
+function tokenizeExpandableString(str)
+    local result = {}
+    local from = 1
+    while true do
+        local first, last = string.find(str, '%$%$?%w*', from)
+        if first == nil then
+            break
+        end
+        result[#result+1] = string.sub(str, from, first-1)
+        result[#result+1] = string.sub(str, first, last)
+        from = last+1
     end
-    return str
+    result[#result+1] = string.sub(str, from, #str)
+    return result
 end
 
 function expandNamed(t)
     assert(#t == 1)
-    local str = t[1]
-    for key,value in pairs(t) do
-        local var = '$'..key
-        str = string.gsub(str, var, value)
+    local tokens = tokenizeExpandableString(t[1])
+    local result = {}
+    for i=1,#tokens do
+        local token = tokens[i]
+        if token:sub(1,1) ~= '$' or token:sub(2,2) == '$' then
+            result[#result+1] = token
+        else
+            assert(#token > 1)
+            local value = t[token:sub(2)]
+            assert(value ~= nil)
+            result[#result+1] = value
+        end
     end
-    return str
+    return table.concat(result)
+end
+
+function expandPositional(str, ...)
+    local arg = {...}
+    local t = {str}
+    for i=0,#arg do
+        t[''..i] = arg[i]
+    end
+    return expandNamed(t)
 end
 
 function process(file)
@@ -212,3 +236,4 @@ if target then
 else
 	io.write(generated)
 end
+
