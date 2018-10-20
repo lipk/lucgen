@@ -129,6 +129,7 @@ function expandNamed(t)
         local var = '$'..key
         str = string.gsub(str, var, value)
     end
+    return str
 end
 
 function process(file)
